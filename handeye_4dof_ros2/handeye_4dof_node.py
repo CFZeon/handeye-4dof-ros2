@@ -15,6 +15,7 @@ class Handeye4Dof(Node):
 
     def __init__(self):
         super().__init__('handeye_4dof_node')
+        # TODO: create config file for these parameters
         base_to_hand_topic = "base_to_robot" # temp before replacing with config input
         robot_to_marker_topic = "robot_to_marker" # temp before replacing with config input
         self.antiparallel_screw_axes = False
@@ -27,30 +28,34 @@ class Handeye4Dof(Node):
         self.robot_to_marker = self.create_subscription(
             PoseArray,
             robot_to_marker_topic,
-            self.listener_callback,
+            self.camera_to_marker_callback,
             10)
         self.calibrated_pose = self.create_publisher(
             Pose, 
-            calibrated_pose_topic, 
-            self.calculate_handeye_calibration)
+            calibrated_pose_topic, 10)
         timer_period = 0.5  # seconds
         self.calibration_pose = Pose()
         self.base_to_hand_list = []
         self.camera_to_marker_list = []
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
-    def timer_callback(self):
-        if self.calibration_pose.position.x == 0 and self.calibration_pose.position.y == 0 and self.calibration_pose.position.x == z:
-             if len(self.base_to_hand_list) > 0 and len(self.camera_to_marker_list) > 0:
-                 self.calculate_handeye_calibration()
-        self.calibrated_pose.publish(self.calibration_pose)
     
+    # TODO: convert this to a service call
+    def timer_callback(self):
+        if self.calibration_pose.position.x == 0 and self.calibration_pose.position.y == 0 and self.calibration_pose.position.z == 0:
+            if len(self.base_to_hand_list) > 0 and len(self.camera_to_marker_list) > 0:
+                self.calculate_handeye_calibration()
+                self.calibrated_pose.publish(self.calibration_pose)
+                #self.destroy_node()
+    
+    # TODO: convert this to a service call
     # Takes in a pose array and converts it to a list of numpy arrays
     def base_to_hand_callback(self, msg):
         self.base_to_hand_list = []
         for i in range(0, len(msg.poses)):
             self.base_to_hand_list.append(self.convert_pose_to_transform_matrix(msg.poses[i]))
 
+    # TODO: convert this to a service call
     # Takes in a pose array and converts it to a list of numpy arrays        
     def camera_to_marker_callback(self, msg):
         self.camera_to_marker_list = []

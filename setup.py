@@ -1,7 +1,7 @@
 from setuptools import setup
 
-package_name = 'handeye-4dof-ros2'
-submodules = 'handeye-4dof-ros2/handeye_4dof'
+package_name = 'handeye_4dof_ros2'
+submodules = 'handeye_4dof_ros2/handeye_4dof'
 
 setup(
     name=package_name,
@@ -21,7 +21,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'handeye_4dof = handeye_4dof_ros2.handeye_4dof_node:main',
+            'handeye_4dof_node = handeye_4dof_ros2.handeye_4dof_node:main'
         ],
     },
 )
