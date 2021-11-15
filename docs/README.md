@@ -23,7 +23,7 @@ python3 -m pip install -r requirements.txt
 The expected format for poses are an input of geometry_msgs.msg.PoseArray. There is a helper function to convert the input pose into 4x4 matrices. The calculated result will then be published once and the node is killed.
 
 subscribers:
-+
+
 base_to_robot (geometry_msgs.msg.PoseArray)
 
 camera_to_marker (geometry_msgs.msg.PoseArray)
