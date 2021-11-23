@@ -2,7 +2,6 @@ import rclpy
 from rclpy.node import Node
 
 import numpy as np
-from scipy.spatial.transform import Rotation as R
 from .handeye_4dof import Calibrator4DOF, robot_pose_selector
 from .handeye_4dof import transformations as tf
 
@@ -54,8 +53,6 @@ class Handeye4Dof(Node):
         self.base_to_hand_list = []
         for i in range(0, len(msg.poses)):
             self.base_to_hand_list.append(self.convert_pose_to_transform_matrix(msg.poses[i]))
-        print("base_to_hand")
-        print(self.base_to_hand_list)
 
     # TODO: convert this to a service call
     # Takes in a pose array and converts it to a list of numpy arrays        
@@ -63,8 +60,6 @@ class Handeye4Dof(Node):
         self.camera_to_marker_list = []
         for i in range(0, len(msg.poses)):
             self.camera_to_marker_list.append(self.convert_pose_to_transform_matrix(msg.poses[i]))
-        print("camera to marker")
-        print(self.camera_to_marker_list)
         
     #convert ROS2 pose message to 4x4 transform matrix
     def convert_pose_to_transform_matrix(self, pose):

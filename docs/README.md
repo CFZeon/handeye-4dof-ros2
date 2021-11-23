@@ -20,7 +20,7 @@ To run, first install necessary packages.
 ```bash
 python3 -m pip install -r requirements.txt
 ```
-The expected format for poses are an input of geometry_msgs.msg.PoseArray. There is a helper function to convert the input pose into 4x4 matrices. The calculated result will then be published once and the node is killed.
+The expected format for poses are an input of geometry_msgs.msg.PoseArray. There is a helper function to convert the input pose into 4x4 matrices. The calculated result will then be published 
 
 subscribers:
 
@@ -33,6 +33,8 @@ publishers:
 calibrated_pose (geometry_msgs.msg.Pose)
 
 services:
+
+calculate_calibration (std_srvs.srv.Empty)
 
 
 Afterwards, the node can be run by running the command shown below. 
