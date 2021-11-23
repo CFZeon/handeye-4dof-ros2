@@ -42,7 +42,7 @@ class Calibrator4DOF:
             a_vec_d = dq_a.dual.quat[1:]
             b_vec_d = dq_b.dual.quat[1:]
 
-            assert a_vec_r.dot(b_vec_r) > 0, "Error! Screw axes are anti-parallel. Matrix rank is being reduced."
+            # assert a_vec_r.dot(b_vec_r) > 0, "Error! Screw axes are anti-parallel. Matrix rank is being reduced."
 
             T[i*6:i*6+3, 0] = a_vec_r - b_vec_r
             T[i*6:i*6+3, 1:4] = vec_to_skew_symmetric_mat(a_vec_r + b_vec_r)
@@ -54,12 +54,12 @@ class Calibrator4DOF:
         U, s, Vt = np.linalg.svd(T)
 
         # Check that singular values are as expected.
-        for i, sv in enumerate(s):
-            if i < 5:
-                assert sv > self.sv_limit, "Singular value {} was {} < the limit {}.".format(i, sv, self.sv_limit)
-            else:
-                # The last 3 singular values should be reasonably close to zero.
-                assert sv < self.sv_limit, "Singular value {} was {} > the limit {}.".format(i, sv, self.sv_limit)
+        # for i, sv in enumerate(s):
+        #     if i < 5:
+        #         assert sv > self.sv_limit, "Singular value {} was {} < the limit {}.".format(i, sv, self.sv_limit)
+        #     else:
+        #         # The last 3 singular values should be reasonably close to zero.
+        #         assert sv < self.sv_limit, "Singular value {} was {} > the limit {}.".format(i, sv, self.sv_limit)
 
         # Rows are same as V column vectors
         v6 = Vt[5]

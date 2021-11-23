@@ -18,6 +18,7 @@ class Handeye4Dof(Node):
         # TODO: create config file for these parameters
         base_to_hand_topic = "base_to_robot" # temp before replacing with config input
         robot_to_marker_topic = "robot_to_marker" # temp before replacing with config input
+        self.calculate_nonlinear = True
         self.antiparallel_screw_axes = False
         calibrated_pose_topic = "calibrated_pose"
         self.base_to_hand = self.create_subscription(
@@ -33,20 +34,19 @@ class Handeye4Dof(Node):
         self.calibrated_pose = self.create_publisher(
             Pose, 
             calibrated_pose_topic, 10)
-        timer_period = 0.5  # seconds
+        self.calculate_calib_srv = self.create_service(Empty, 'calculate_calibration', self.calculate_calib_callback)
         self.calibration_pose = Pose()
         self.base_to_hand_list = []
         self.camera_to_marker_list = []
-        self.timer = self.create_timer(timer_period, self.timer_callback)
 
     
-    # TODO: convert this to a service call
-    def timer_callback(self):
-        if self.calibration_pose.position.x == 0 and self.calibration_pose.position.y == 0 and self.calibration_pose.position.z == 0:
-            if len(self.base_to_hand_list) > 0 and len(self.camera_to_marker_list) > 0:
-                self.calculate_handeye_calibration()
-                self.calibrated_pose.publish(self.calibration_pose)
-                #self.destroy_node()
+    # this is connected to an empty service to keep message types generic
+    def calculate_calib_callback(self, req, res):
+        if len(self.base_to_hand_list) > 0 and len(self.camera_to_marker_list) > 0:
+            self.calculate_handeye_calibration()
+            self.calibrated_pose.publish(self.calibration_pose)
+        return res
+    
     
     # TODO: convert this to a service call
     # Takes in a pose array and converts it to a list of numpy arrays
@@ -54,6 +54,8 @@ class Handeye4Dof(Node):
         self.base_to_hand_list = []
         for i in range(0, len(msg.poses)):
             self.base_to_hand_list.append(self.convert_pose_to_transform_matrix(msg.poses[i]))
+        print("base_to_hand")
+        print(self.base_to_hand_list)
 
     # TODO: convert this to a service call
     # Takes in a pose array and converts it to a list of numpy arrays        
@@ -61,6 +63,8 @@ class Handeye4Dof(Node):
         self.camera_to_marker_list = []
         for i in range(0, len(msg.poses)):
             self.camera_to_marker_list.append(self.convert_pose_to_transform_matrix(msg.poses[i]))
+        print("camera to marker")
+        print(self.camera_to_marker_list)
         
     #convert ROS2 pose message to 4x4 transform matrix
     def convert_pose_to_transform_matrix(self, pose):
@@ -77,7 +81,6 @@ class Handeye4Dof(Node):
 
         # Initialize calibrator with precomputed motions.
         cb = Calibrator4DOF(motions)
-
 
         dq_x = cb.calibrate(antiparallel_screw_axes=self.antiparallel_screw_axes)
 
@@ -101,6 +104,7 @@ class Handeye4Dof(Node):
         calibration_pose.orientation.z = quat[2]
         calibration_pose.orientation.w = quat[3]
         self.calibration_pose = calibration_pose
+        print(calibration_pose)
 
 def main(args=None):
     rclpy.init(args=args)
