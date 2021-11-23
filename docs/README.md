@@ -6,6 +6,8 @@
 <em> Figure 1. Handeye calibration for 4DOF SCARA arms [1]. Left is eye-on-base and right is eye-on-hand. </em>
 </p>
 
+This package is an improvised ROS2 wrapper for the handeye-4dof algorithm that this is forked from.
+
 This package provides eye-on-hand handeye calibration for 4DOF robot manipulators using dual quaternions. This is an implementation of [1] which extended dual quaternion handeye calibration techniques [2] to 4DOF robots. Handeye calibration through dual quaternions is favorable as it allows for us to solve for translation and rotation simultaneously, thus avoiding any compounding error resultant from solving these separately.
 ## Background
 
@@ -18,40 +20,27 @@ To run, first install necessary packages.
 ```bash
 python3 -m pip install -r requirements.txt
 ```
-The expected format for poses is a pickle file containing a tuple consisting of a list of base to hand transforms and a list of camera to marker transforms. All transforms should be 4x4 numpy arrays.
+The expected format for poses are an input of geometry_msgs.msg.PoseArray. There is a helper function to convert the input pose into 4x4 matrices. The calculated result will then be published once and the node is killed.
 
-Afterwards, calibration can be performed by running the command shown below. 
+subscribers:
+
+base_to_robot (geometry_msgs.msg.PoseArray)
+
+camera_to_marker (geometry_msgs.msg.PoseArray)
+
+publishers:
+
+calibrated_pose (geometry_msgs.msg.Pose)
+
+services:
+
+
+Afterwards, the node can be run by running the command shown below. 
 
 ```bash
-cd src # For descriptions on the command line arguments, run python3 calibrate.py -h
-python3 calibrate.py [-h] [-p POSE_PATH] [-m MOTION_PATH] [-c] [-a] [-n] [-s SAMPLE]
+colcon build --symlink-install && . install/setup.bash
+ros2 run handeye_4dof_ros2 handeye_4dof_node
 ```
-
-For those who wish to create their own custom scripts, an example template is provided in `src/example.py` *(small snippet shown below)*. Running these examples will also perform the calibration on the provided example data.
-```python3
-def main():
-    with open("../example_data/pose_samples.pkl", "rb") as f:
-        try:
-            base_to_hand, camera_to_marker = pickle.load(f)
-        except UnicodeDecodeError:
-            # python 2 to python 3 pickle in case sampling was done in ROS
-            base_to_hand, camera_to_marker = pickle.load(f, encoding='latin1')
-
-    # Obtain optimal motions as dual quaternions.
-    motions = robot_pose_selector(camera_to_marker, base_to_hand)
-
-    # Initialize calibrator with precomputed motions.
-    cb = Calibrator4DOF(motions)
-
-    # Our camera and end effector z-axes are antiparallel so we apply a 180deg x-axis rotation.
-    dq_x = cb.calibrate(antiparallel_screw_axes=True)
-
-    # Hand to Camera TF obtained from handeye calibration.
-    ca_hand_to_camera = np.linalg.inv(dq_x.as_transform())
-
-    # Hand to Camera TF obtained from post nonlinear refinement.
-    nl_hand_to_camera = cb.nonlinear_refinement(base_to_hand, camera_to_marker, ca_hand_to_camera)
-  ```
 
 ## TODO
 If you would like to contribute by implementing any of the tasks below or you spot an error in the existing code base, feel free to submit a pull request!
