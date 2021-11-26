@@ -9,14 +9,16 @@ from geometry_msgs.msg import PoseArray
 from geometry_msgs.msg import Pose
 from std_srvs.srv import Empty
 
+from ament_index_python.packages import get_package_share_directory
+HANDEYE_4DOF_SHARE = get_package_share_directory('handeye_4dof_ros2')
 
 class Handeye4Dof(Node):
 
     def __init__(self):
         super().__init__('handeye_4dof_node')
         # TODO: create config file for these parameters
-        base_to_hand_topic = "base_to_robot" # temp before replacing with config input
-        robot_to_marker_topic = "robot_to_marker" # temp before replacing with config input
+        base_to_hand_topic = "base_to_robot" 
+        robot_to_marker_topic = "robot_to_marker" 
         self.calculate_nonlinear = True
         self.antiparallel_screw_axes = False
         calibrated_pose_topic = "calibrated_pose"
@@ -46,15 +48,12 @@ class Handeye4Dof(Node):
             self.calibrated_pose.publish(self.calibration_pose)
         return res
     
-    
-    # TODO: convert this to a service call
     # Takes in a pose array and converts it to a list of numpy arrays
     def base_to_hand_callback(self, msg):
         self.base_to_hand_list = []
         for i in range(0, len(msg.poses)):
             self.base_to_hand_list.append(self.convert_pose_to_transform_matrix(msg.poses[i]))
 
-    # TODO: convert this to a service call
     # Takes in a pose array and converts it to a list of numpy arrays        
     def camera_to_marker_callback(self, msg):
         self.camera_to_marker_list = []
